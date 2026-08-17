@@ -285,7 +285,13 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
             />
           </aside>
 
-          <div id="map-pane" className="min-w-0">
+          {/*
+            `scroll-mt` matches the sticky top bar's height (the same 4.25rem the
+            filter rail offsets itself by). Without it, jumping to this anchor —
+            from the hero CTA or the skip link — parks the top strip of the map
+            underneath the header, where any marker sitting there is unclickable.
+          */}
+          <div id="map-pane" className="min-w-0 scroll-mt-[4.25rem]">
             {filtersActive && (
               <div className="border-b border-hairline bg-white px-4 py-2">
                 <ActiveChips
@@ -343,7 +349,7 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
         </div>
       </main>
 
-      <div id="results" className="print-break-before">
+      <div id="results" className="scroll-mt-[4.25rem] print-break-before">
         <ResultsTable
           areas={results}
           lang={lang}
