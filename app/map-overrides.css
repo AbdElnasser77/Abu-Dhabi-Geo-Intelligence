@@ -1,0 +1,180 @@
+/*
+ * Overrides for MapLibre's own stylesheet.
+ *
+ * These live in a separate file purely for cascade order. The chain in
+ * `app/layout.tsx` is deliberate and all three steps matter:
+ *
+ *   1. globals.css        Tailwind preflight + brand theme
+ *   2. maplibre-gl.css    vendor — must beat preflight, or preflight's button
+ *                         and svg resets strip MapLibre's own controls
+ *   3. map-overrides.css  this file — must beat vendor
+ *
+ * Putting these rules in globals.css instead would place them at step 1, where
+ * vendor wins every tie and the only way to fight back is `!important`.
+ */
+
+/*
+ * The map container's own geometry.
+ *
+ * This CANNOT be expressed with Tailwind's `absolute inset-0` utilities. MapLibre
+ * adds its own `maplibregl-map` class to whatever element you hand it, and the
+ * vendor rule below sets `position: relative`. Since the vendor stylesheet is
+ * imported after Tailwind (step 2 before step 3), that single-class selector beats
+ * `.absolute` at equal specificity — the container stops being positioned,
+ * collapses to height 0, and because `.maplibregl-map` also sets
+ * `overflow: hidden` it then clips the entire map. The canvas falls back to its
+ * 300px default and nothing is visible at all.
+ *
+ * Declaring it here, after vendor, is what makes it stick.
+ */
+.ad-map-container {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * Vendor sets `font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif`
+ * on the map root. That shorthand resets font-family for everything inside the
+ * map — including our HTML markers — so the brand face has to be restored here.
+ *
+ * Only font-family is reset: vendor's 12px/20px is what the attribution and
+ * scale bar are sized against, and inheriting the body's 16px would blow them up.
+ */
+.maplibregl-map {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+[dir="rtl"] .maplibregl-map {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+  /* MapLibre positions its control containers with physical left/right, and the
+   * attribution string is English. Keeping the map's own chrome LTR inside an
+   * RTL page stops the scale bar and attribution reading backwards. */
+  direction: ltr;
+}
+
+.maplibregl-ctrl-group {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 11px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--color-charcoal);
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------------
+ * Hover / focus detail popup.
+ *
+ * Lives here because it restyles MapLibre's own `.maplibregl-popup-*` internals,
+ * which are defined in the vendor stylesheet imported just before this file.
+ * --------------------------------------------------------------------------- */
+
+/*
+ * `pointer-events: none` is load-bearing, not cosmetic. The popup opens above a
+ * 34px marker and overlaps it; if the popup could receive the pointer it would
+ * steal the mouseleave, and hover would flicker on and off continuously. Nothing
+ * inside is interactive, so there is nothing to lose by making it inert.
+ */
+.maplibregl-popup.ad-popup {
+  pointer-events: none;
+  max-width: 320px;
+  z-index: 4;
+}
+
+.maplibregl-popup.ad-popup .maplibregl-popup-content {
+  padding: 0;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.18);
+  overflow: hidden;
+  /*
+   * Vendor sets `pointer-events: auto` here, which defeats the `none` on the
+   * popup root above — inheritance cannot win against an explicit declaration.
+   * Without this line the popup body captures the pointer, swallows the marker's
+   * mouseleave, and hover flickers on and off.
+   */
+  pointer-events: none;
+}
+
+.ad-popup-body {
+  padding: 9px 11px 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+
+.ad-popup-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 7px;
+  margin-bottom: 7px;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.ad-popup-badge {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-popup-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ad-popup-alt {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
+
+.ad-popup-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+}
+
+.ad-popup-grid dt {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+
+.ad-popup-grid dd {
+  font-size: 11.5px;
+}
+
+.ad-popup-list {
+  margin: 2px 0 0;
+  padding-inline-start: 14px;
+  list-style: disc;
+  font-size: 11.5px;
+}
+
+.ad-popup-hint {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-hairline);
+  font-size: 10.5px;
+  color: var(--color-ink-muted);
+}
+
+/* Match the focus treatment used everywhere else in the app (WCAG 2.2 AA). */
+.maplibregl-ctrl button:focus-visible {
+  outline: 3px solid var(--color-uae-red);
+  outline-offset: 2px;
+}

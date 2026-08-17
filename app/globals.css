@@ -1,26 +1,194 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Brand palette from reference/09 "Design system". Tailwind v4 is configured
+ * CSS-first — there is no tailwind.config file in this project, so tokens
+ * declared here are what generate the `bg-*`, `text-*` and `border-*` utilities.
+ */
+@theme {
+  --color-uae-red: #c8102e;
+  --color-emerald-brand: #0b7a53;
+  --color-deep-green: #064e3b;
+  --color-charcoal: #121826;
+  --color-sand: #f5f1e8;
+  --color-pale-green: #ecf6f1;
+  --color-gold: #c99a2e;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-ink: #121826;
+  --color-ink-muted: #5b6472;
+  --color-hairline: #e2ddd0;
+  --color-surface: #ffffff;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-arabic: var(--font-plex-arabic);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * The create-next-app scaffold set `font-family: Arial` on body, which silently
+ * overrode the font variables above it. Removed. Arabic gets its own face
+ * because Geist has no Arabic coverage.
+ */
+body {
+  background: var(--color-sand);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/*
+ * Matches whichever element carries dir="rtl" and inherits down. It has to be
+ * the bare attribute rather than `[dir="rtl"] body`, because `dir` is set on a
+ * wrapper INSIDE body (the page reads it from searchParams, which a layout
+ * cannot). Form controls inherit automatically — Tailwind preflight already
+ * applies `font: inherit` to them.
+ */
+[dir="rtl"] {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+}
+
+/* Respect the OS setting rather than animating regardless (reference/09). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* A consistently visible focus ring — a WCAG 2.2 AA requirement. */
+:where(a, button, input, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-uae-red);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Map markers.
+ *
+ * Split of responsibility: MapLibre owns the wrapper's `transform` for
+ * positioning, so all visual transforms (hover lift, selected ring) live on the
+ * inner button. Fighting MapLibre for the same property makes markers drift.
+ * --------------------------------------------------------------------------- */
+.ad-marker-wrap {
+  line-height: 0;
+}
+
+/*
+ * Teardrop pin, matching the reference implementation. Built from one rotated box
+ * with three rounded corners and one sharp one, so the sharp corner becomes the
+ * tip. The label has to be counter-rotated, which is why the digit lives in an
+ * inner span rather than being the button's own text.
+ */
+.ad-marker {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid #ffffff;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 4px 10px rgb(0 0 0 / 0.18);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.ad-marker-glyph {
+  display: block;
+  transform: rotate(45deg);
+  line-height: 1;
+}
+
+.ad-marker:hover {
+  transform: rotate(-45deg) scale(1.18);
+  z-index: 2;
+}
+
+.ad-marker[data-selected="true"] {
+  /* reference/03: 3px white inner stroke plus a UAE-red outer accent. */
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 6px var(--color-uae-red),
+    0 4px 12px rgb(0 0 0 / 0.3);
+  transform: rotate(-45deg) scale(1.12);
+  z-index: 3;
+}
+
+/*
+ * Hidden markers are removed from the accessibility tree and the layout, not
+ * merely faded — a dimmed-but-present marker would still be counted and still
+ * intercept clicks. A marker is hidden for one of two reasons: it does not match
+ * the active query, or it has been folded into a cluster at this zoom.
+ */
+.ad-marker-wrap[hidden] {
+  display: none !important;
+}
+
+/*
+ * Cluster bubble, shown where markers would otherwise cover each other.
+ *
+ * Deliberately NOT coloured by the active thematic layer: a cluster stands for
+ * several areas that may span the whole purchasing-power range, so tinting it
+ * with one band's colour would assert something false. The double ring reads as
+ * "a group" rather than "a place".
+ */
+.ad-cluster {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 7px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  background: var(--color-deep-green);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 4px rgb(6 78 59 / 0.2),
+    0 2px 8px rgb(0 0 0 / 0.25);
+  transition: transform 140ms ease;
+}
+
+.ad-cluster:hover {
+  transform: scale(1.12);
+  z-index: 2;
+}
+
+/* MapLibre's own chrome is restyled in `app/map-overrides.css`, which is imported
+ * after the vendor stylesheet — those rules would lose every tie from here. */
+
+/* ---------------------------------------------------------------------------
+ * Print — reference/15 §6 asks for query criteria, map, legend and results.
+ * --------------------------------------------------------------------------- */
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .print-break-before {
+    break-before: page;
+  }
+
+  /* Tables must not be clipped mid-row across pages. */
+  tr,
+  img,
+  .print-keep {
+    break-inside: avoid;
+  }
 }
