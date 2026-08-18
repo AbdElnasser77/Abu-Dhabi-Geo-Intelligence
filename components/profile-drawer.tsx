@@ -71,7 +71,7 @@ function TagList({ items }: { items: readonly string[] }) {
       {items.map((item) => (
         <li
           key={item}
-          className="rounded-full border border-hairline bg-sand px-2 py-0.5 text-xs text-ink"
+          className="rounded-full border border-hairline bg-raised px-2 py-0.5 text-xs text-ink"
         >
           {item}
         </li>
@@ -98,7 +98,7 @@ export function ProfileDrawer({
   const canonicalSegments = area.segments.map((id) => bi(SEGMENT_LABELS[id], lang));
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-surface">
       <div className="border-b border-hairline p-4">
         <div className="flex items-start justify-between gap-3">
           <nav aria-label="breadcrumb" className="text-[11px] text-ink-muted">
@@ -143,7 +143,7 @@ export function ProfileDrawer({
       <div
         role="tablist"
         aria-label={t("directory", lang)}
-        className="flex shrink-0 gap-1 overflow-x-auto border-b border-hairline bg-sand px-2 py-1.5"
+        className="flex shrink-0 gap-1 overflow-x-auto border-b border-hairline bg-raised px-2 py-1.5"
       >
         {TAB_KEYS.map((key) => (
           <button
@@ -158,8 +158,8 @@ export function ProfileDrawer({
             className={[
               "shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
               tab === key
-                ? "bg-deep-green text-white"
-                : "text-ink hover:bg-white hover:text-deep-green",
+                ? "bg-flare text-flare-ink"
+                : "text-ink hover:bg-surface hover:text-flare",
             ].join(" ")}
           >
             {t(key, lang)}
@@ -258,7 +258,7 @@ export function ProfileDrawer({
                   {matrix.map((profile) => (
                     <li
                       key={profile.key}
-                      className="rounded-lg border border-hairline bg-sand/60 p-2.5"
+                      className="rounded-lg border border-hairline bg-raised/60 p-2.5"
                     >
                       <p className="text-sm font-semibold text-ink">
                         {bi(profile.name, lang)}
@@ -343,7 +343,7 @@ export function ProfileDrawer({
               </table>
             </div>
 
-            <p className="rounded-lg border border-uae-red/30 bg-uae-red/5 px-3 py-2 text-[11px] leading-relaxed text-ink">
+            <p className="rounded-lg border border-uae-red/30 bg-uae-red/10 px-3 py-2 text-[11px] leading-relaxed text-ink">
               {t("ppEthics", lang)}
             </p>
             <p className="text-[11px] leading-relaxed text-ink-muted">
@@ -377,7 +377,7 @@ export function ProfileDrawer({
               {t("opportunitiesIntro", lang)}
             </p>
             {matrix.length === 0 ? (
-              <p className="rounded-lg bg-sand px-3 py-2 text-xs text-ink-muted">
+              <p className="rounded-lg bg-raised px-3 py-2 text-xs text-ink-muted">
                 {t("noSegmentGuidance", lang)}
               </p>
             ) : (
@@ -444,7 +444,7 @@ export function ProfileDrawer({
                     href={source.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-1 inline-block text-[11px] font-medium text-deep-green underline"
+                    className="mt-1 inline-block text-[11px] font-medium text-flare underline"
                   >
                     {t("openSource", lang)}
                   </a>

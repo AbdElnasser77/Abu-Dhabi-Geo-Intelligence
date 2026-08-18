@@ -7,13 +7,13 @@ import { ActiveChips } from "@/components/filters/active-chips";
 import { FilterRail } from "@/components/filters/filter-rail";
 import { KpiStrip } from "@/components/kpi-strip";
 import { MapShell } from "@/components/map/map-shell";
+import { MapToolbar } from "@/components/map/map-toolbar";
 import { ProfileDrawer } from "@/components/profile-drawer";
 import { RegionPanel } from "@/components/region-panel";
 import { ResultsTable } from "@/components/results-table";
 import { TopBar } from "@/components/top-bar";
 import { downloadCsv } from "@/lib/csv";
 import { areaById } from "@/lib/data/areas";
-import { REFERENCE_YEAR, SOURCES } from "@/lib/data/emirate";
 import {
   applyPatch,
   filterAreas,
@@ -22,7 +22,7 @@ import {
   type FilterPatch,
   type Query,
 } from "@/lib/filter";
-import { bi, dir, t } from "@/lib/i18n";
+import { dir, t } from "@/lib/i18n";
 import {
   getterFromSearchParams,
   parseQuery,
@@ -229,35 +229,62 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
     <>
       <a
         href="#map-pane"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-flare focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-flare-ink"
       >
         {t("skipToMap", lang)}
       </a>
       <a
         href="#results"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-flare focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-flare-ink"
       >
         {t("skipToResults", lang)}
       </a>
 
+      {/*
+        The bar is `fixed` (see components/top-bar.tsx), so it is out of the flow
+        and its position in this tree no longer decides where it paints. It is
+        still declared outside the one-screen block below rather than inside it,
+        because that block is `h-[calc(100svh - topbar)]` — a bar counted as one
+        of its children would be subtracted from that height twice.
+      */}
       <TopBar
         lang={lang}
-        searchValue={searchInput}
-        onSearchChange={onSearchChange}
         onToggleLang={onToggleLang}
-        onExport={onExport}
         onToggleFilters={() => setFiltersOpen((open) => !open)}
         filtersOpen={filtersOpen}
-        exportDisabled={results.length === 0}
-        matchCount={results.length}
-        contextRegion={panelRegion}
       />
 
-      {/* The data rule from reference/00, stated once and prominently rather than
-          buried in a methodology page the user may never open. */}
-      <p className="border-b border-gold/40 bg-gold/10 px-4 py-2 text-xs leading-relaxed text-ink lg:px-6">
-        {t("governanceBanner", lang)}
-      </p>
+      <div className="lg:flex lg:h-[calc(100svh-var(--spacing-topbar))] lg:min-h-0 lg:flex-col">
+      {/*
+        The workspace viewport: data rule, KPI strip and the map, sized to
+        exactly one screen on `lg` and up.
+
+        A flex column rather than `calc(100vh - <constant>)` on the map, because
+        there is no constant for the CHROME INSIDE it: the KPI strip expands when
+        the reader opens "Emirate demographics", and any hardcoded subtraction is
+        wrong in one of those two states — measured, the old `calc(100vh-8.5rem)`
+        overshot by 428px. Here the map simply takes whatever is left.
+
+        The one subtraction that IS safe is the fixed bar, which permanently
+        covers that strip of the viewport: at `lg` it enforces `h-topbar` and does
+        not wrap, so `100svh - var(--spacing-topbar)` is exact rather than
+        estimated. `svh` and not `vh` for the same reason the hero uses it — `vh`
+        measures the viewport without the mobile browser chrome subtracted.
+
+        Below `lg` this does not apply: the columns stack, and forcing a stack into
+        one screen would leave the map unusably short.
+      */}
+      {/*
+        The gold data-rule strip that used to sit here has gone.
+
+        It was not "stated once": the identical sentence is already in the footer
+        below, and `components/baseline-strip.tsx` states the same district-level
+        gap immediately above this block. Three copies within one scroll is not
+        prominence, and as a tinted alert bar wedged between the top bar and the
+        KPI cards it read as a warning about the page rather than as provenance.
+        The footer is where it belongs, and dropping it here returns 37px of the
+        one-screen budget to the map.
+      */}
 
       <KpiStrip
         lang={lang}
@@ -265,13 +292,18 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
         onToggleRegion={onToggleRegion}
       />
 
-      <main className="mx-auto w-full max-w-[1600px]">
-        <div className={`lg:grid lg:items-start ${gridCols}`}>
+      <main className="mx-auto w-full max-w-[1600px] lg:min-h-0 lg:flex-1">
+        {/* `grid-rows-[minmax(0,1fr)]` gives the row a definite height to fill;
+            without it the implicit row is `auto` and sizes to content, so `h-full`
+            on the children below would have nothing to resolve against. */}
+        <div className={`lg:grid lg:h-full lg:min-h-0 lg:grid-rows-[minmax(0,1fr)] lg:items-start ${gridCols}`}>
           <aside
             id="filter-rail"
             aria-label={t("filters", lang)}
             className={[
-              "border-b border-hairline bg-white lg:sticky lg:top-[4.25rem] lg:block lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto lg:border-b-0 lg:border-e print-hide",
+              // `max-h-full`, not a vh calc: capped to the row so a long filter list
+              // scrolls inside it instead of stretching the row past one screen.
+              "border-b border-hairline bg-surface lg:sticky lg:top-topbar lg:block lg:max-h-full lg:overflow-y-auto lg:border-b-0 lg:border-e print-hide",
               filtersOpen ? "block" : "hidden",
             ].join(" ")}
           >
@@ -286,14 +318,36 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
           </aside>
 
           {/*
-            `scroll-mt` matches the sticky top bar's height (the same 4.25rem the
-            filter rail offsets itself by). Without it, jumping to this anchor —
-            from the hero CTA or the skip link — parks the top strip of the map
-            underneath the header, where any marker sitting there is unclickable.
+            `scroll-mt` clears the sticky top bar. Without it, jumping to this
+            anchor — from the hero CTA or the skip link — parks the top strip of
+            the map underneath the header, where any marker sitting there is
+            unclickable.
+
+            Two values, because the bar is two different heights: `h-topbar` at
+            `lg` where it is pinned to one row, and taller below that where
+            `flex-wrap` gives the search field a row of its own. 6.25rem covers
+            the wrapped case with room to spare — overshooting only leaves a
+            little air above the anchor, while undershooting hides the thing the
+            reader just jumped to.
           */}
-          <div id="map-pane" className="min-w-0 scroll-mt-[4.25rem]">
+          <div
+            id="map-pane"
+            className="min-w-0 scroll-mt-[6.25rem] lg:scroll-mt-topbar lg:flex lg:min-h-0 lg:flex-col lg:self-stretch"
+          >
+            {/* Search, the live match count and CSV export. Moved out of the top
+                bar: all three act on the query, and this is where its result is
+                shown. See components/map/map-toolbar.tsx. */}
+            <MapToolbar
+              lang={lang}
+              searchValue={searchInput}
+              onSearchChange={onSearchChange}
+              onExport={onExport}
+              exportDisabled={results.length === 0}
+              matchCount={results.length}
+            />
+
             {filtersActive && (
-              <div className="border-b border-hairline bg-white px-4 py-2">
+              <div className="border-b border-hairline bg-surface px-4 py-2">
                 <ActiveChips
                   lang={lang}
                   query={query}
@@ -325,7 +379,7 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
                instance either way, so tab state survives a resize. */
             <aside
               aria-label={selected ? t("directory", lang) : t("regionIntelligence", lang)}
-              className="fixed inset-x-0 bottom-0 z-40 h-[60vh] overflow-hidden rounded-t-2xl border-t border-hairline bg-white shadow-2xl lg:sticky lg:inset-auto lg:top-[3.5rem] lg:z-auto lg:h-[calc(100vh-8.5rem)] lg:rounded-none lg:border-s lg:border-t-0 lg:shadow-none"
+              className="fixed inset-x-0 bottom-0 z-40 h-[60vh] overflow-hidden rounded-t-2xl border-t border-hairline bg-surface shadow-2xl lg:sticky lg:inset-auto lg:top-topbar lg:z-auto lg:h-full lg:rounded-none lg:border-s lg:border-t-0 lg:shadow-none"
             >
               {selected ? (
                 <ProfileDrawer area={selected} lang={lang} onClose={() => onSelect(null)} />
@@ -348,8 +402,9 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
           )}
         </div>
       </main>
+      </div>
 
-      <div id="results" className="scroll-mt-[4.25rem] print-break-before">
+      <div id="results" className="scroll-mt-[6.25rem] lg:scroll-mt-topbar print-break-before">
         <ResultsTable
           areas={results}
           lang={lang}
@@ -360,29 +415,6 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
         />
       </div>
 
-      <footer className="mt-6 border-t border-hairline bg-white px-4 py-5 text-xs text-ink-muted lg:px-6">
-        <p className="max-w-3xl leading-relaxed">{t("governanceBanner", lang)}</p>
-        <p className="mt-2">
-          {t("dataYear", lang)} <span className="tabular-nums">{REFERENCE_YEAR}</span> ·{" "}
-          {t("sourceLabel", lang)}:{" "}
-          {SOURCES.map((source, index) => (
-            <span key={source.id}>
-              {index > 0 && " · "}
-              <a
-                className="font-medium text-deep-green underline"
-                href={source.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {bi(source.title, lang)}
-              </a>
-            </span>
-          ))}
-        </p>
-        <p className="mt-2">
-          {t("pointProfileNote", lang)} Basemap © OpenStreetMap contributors.
-        </p>
-      </footer>
     </>
   );
 }

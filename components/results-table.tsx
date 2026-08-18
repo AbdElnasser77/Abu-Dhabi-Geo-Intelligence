@@ -38,11 +38,20 @@ export function ResultsTable({
   hasFilters: boolean;
 }) {
   return (
-    <section aria-labelledby="directory-heading" className="bg-white">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 px-4 pt-4 lg:px-6">
+    <section aria-labelledby="directory-heading" className="bg-base">
+      {/*
+        The same `max-w-[1600px]` container as every other section, which this was
+        missing — it ran full-bleed while the hero, signals, baseline and footer all
+        sat on the shared measure, so the directory looked like it belonged to a
+        different page. Panelled in `bg-surface` with a hairline so it reads as one
+        object rather than as loose rows on the page ground.
+      */}
+      <div className="mx-auto w-full max-w-[1600px] px-4 pt-14 pb-16 lg:px-6">
+        <div className="reveal-on-scroll overflow-hidden rounded-2xl border border-hairline bg-surface">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 px-4 pt-5 lg:px-6">
         <h2
           id="directory-heading"
-          className="text-[11px] font-semibold uppercase tracking-[0.14em] text-deep-green"
+          className="text-[11px] font-semibold uppercase tracking-[0.14em] text-flare"
         >
           {t("liveFilteredDirectory", lang)}{" "}
           <span className="font-normal tabular-nums text-ink-muted">
@@ -53,7 +62,7 @@ export function ResultsTable({
       </div>
 
       {areas.length === 0 ? (
-        <div className="mx-4 my-4 rounded-xl border border-dashed border-hairline bg-sand px-4 py-8 text-center lg:mx-6">
+        <div className="mx-4 my-4 rounded-xl border border-dashed border-hairline bg-raised px-4 py-8 text-center lg:mx-6">
           <p className="text-sm font-semibold text-ink">{t("noMatchesTitle", lang)}</p>
           <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-ink-muted">
             {t("noMatchesBody", lang)}
@@ -62,16 +71,16 @@ export function ResultsTable({
             <button
               type="button"
               onClick={onReset}
-              className="mt-3 rounded-lg border border-hairline bg-white px-3 py-2 text-xs font-semibold text-ink hover:border-uae-red hover:text-uae-red"
+              className="mt-3 rounded-lg border border-hairline bg-surface px-3 py-2 text-xs font-semibold text-ink hover:border-uae-red hover:text-uae-red"
             >
               {t("resetAll", lang)}
             </button>
           )}
         </div>
       ) : (
-        <div className="mt-3 overflow-x-auto">
+        <div className="mt-4 overflow-x-auto pb-1">
           <table className="w-full min-w-[62rem] border-collapse text-sm">
-            <thead className="bg-sand text-start">
+            <thead className="bg-raised text-start">
               <tr>
                 {(
                   [
@@ -103,7 +112,7 @@ export function ResultsTable({
                     key={area.id}
                     className={[
                       "border-t border-hairline align-top",
-                      selected ? "bg-pale-green" : "hover:bg-sand/60",
+                      selected ? "bg-flare-tint" : "hover:bg-raised/60",
                     ].join(" ")}
                   >
                     <th scope="row" className="px-3 py-2 text-start font-normal">
@@ -113,7 +122,7 @@ export function ResultsTable({
                         aria-pressed={selected}
                         className="text-start"
                       >
-                        <span className="block font-semibold text-deep-green underline decoration-transparent hover:decoration-current">
+                        <span className="block font-semibold text-flare underline decoration-transparent hover:decoration-current">
                           {lang === "ar" ? area.nameAr : area.nameEn}
                         </span>
                         <span
@@ -172,6 +181,8 @@ export function ResultsTable({
           </table>
         </div>
       )}
+        </div>
+      </div>
     </section>
   );
 }

@@ -53,19 +53,23 @@ export function KpiStrip({
   return (
     <section
       aria-label={t("emirateTotal", lang)}
-      className="border-b border-hairline bg-white"
+      className="border-b border-hairline bg-surface"
     >
       <div className="mx-auto grid w-full max-w-[1600px] gap-3 px-4 py-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
-        <div className="rounded-xl bg-deep-green px-4 py-3 text-white">
-          <div className="text-xs font-medium tracking-wide text-white/70">
+        {/* The one gradient fill outside the hero. This is the only `official`
+            emirate-wide figure on the page, so it gets the accent and everything
+            else in the row stays a neutral card — see the note on
+            `bg-flare-gradient` in globals.css. */}
+        <div className="bg-flare-gradient rounded-xl px-4 py-3 text-flare-ink">
+          <div className="text-xs font-medium tracking-wide text-flare-ink/80">
             {t("emirateTotal", lang)} · {REFERENCE_YEAR}
           </div>
           <div className="mt-1 text-3xl font-semibold tabular-nums">
             {formatNumber(EMIRATE.population, lang)}
           </div>
-          <div className="mt-1 text-sm text-white/80">{bi(EMIRATE.name, lang)}</div>
+          <div className="mt-1 text-sm text-flare-ink/85">{bi(EMIRATE.name, lang)}</div>
           <a
-            className="mt-2 inline-block text-xs text-white/90 underline decoration-white/40 hover:decoration-white"
+            className="mt-2 inline-block text-xs text-flare-ink/90 underline decoration-flare-ink/40 hover:decoration-flare-ink"
             href={source.url}
             target="_blank"
             rel="noreferrer"
@@ -85,8 +89,8 @@ export function KpiStrip({
               className={[
                 "rounded-xl border px-4 py-3 text-start transition-colors",
                 active
-                  ? "border-uae-red bg-pale-green ring-2 ring-uae-red"
-                  : "border-hairline bg-white hover:border-emerald-brand hover:bg-pale-green/50",
+                  ? "border-flare bg-flare-tint ring-2 ring-flare"
+                  : "border-hairline bg-surface hover:border-flare/60 hover:bg-flare-tint/60",
               ].join(" ")}
             >
               <div className="flex items-start justify-between gap-2">
@@ -115,7 +119,7 @@ export function KpiStrip({
         published SCAD statistics and were otherwise loaded and never shown.
       */}
       <div className="mx-auto w-full max-w-[1600px] px-4 pb-4 lg:px-6">
-        <details className="rounded-lg border border-hairline bg-sand/60">
+        <details className="rounded-lg border border-hairline bg-raised/60">
           <summary className="cursor-pointer px-3 py-2 text-xs font-semibold text-ink">
             {t("emirateDemographics", lang)} · {REFERENCE_YEAR}
           </summary>
@@ -141,7 +145,7 @@ export function KpiStrip({
           <p className="px-3 pb-3 text-[11px] text-ink-muted">
             {t("sourceLabel", lang)}:{" "}
             <a
-              className="font-medium text-deep-green underline"
+              className="font-medium text-flare underline"
               href={source.url}
               target="_blank"
               rel="noreferrer"

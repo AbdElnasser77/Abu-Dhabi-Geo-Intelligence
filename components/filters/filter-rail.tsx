@@ -65,8 +65,8 @@ function FilterGroup({
               className={[
                 "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
                 active
-                  ? "border-deep-green bg-deep-green text-white"
-                  : "border-hairline bg-white text-ink hover:border-emerald-brand",
+                  ? "border-flare bg-flare font-semibold text-flare-ink"
+                  : "border-hairline bg-surface text-ink hover:border-flare/60",
               ].join(" ")}
             >
               <input
@@ -131,7 +131,7 @@ export function FilterRail({
         </button>
       </div>
 
-      <p className="rounded-md bg-sand px-2.5 py-2 text-[11px] leading-snug text-ink-muted">
+      <p className="rounded-md bg-raised px-2.5 py-2 text-[11px] leading-snug text-ink-muted">
         {t("filterLogic", lang)}
       </p>
 

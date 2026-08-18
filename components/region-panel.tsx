@@ -50,14 +50,14 @@ export function RegionPanel({
   const rounded = Math.round(agg.ppMean) as PurchasingPower;
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-white">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-surface">
       <div className="border-b border-hairline p-5">
         <div className="flex items-start justify-between gap-2">
           <p className="text-[11px] text-ink-muted" dir="rtl">
             {agg.region.name.ar}
           </p>
           <div className="flex shrink-0 items-center gap-2">
-            <span className="inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-medium text-emerald-brand">
+            <span className="inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-medium text-flare">
               <span aria-hidden="true">✓</span>
               {t("officialBaseline", lang)}
             </span>
@@ -99,7 +99,7 @@ export function RegionPanel({
             <p className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
               {t("annualGrowth", lang)}
             </p>
-            <p className="mt-1 text-xl font-semibold tabular-nums text-emerald-brand">
+            <p className="mt-1 text-xl font-semibold tabular-nums text-flare">
               +{formatPercent(EMIRATE_GROWTH_PERCENT, lang)}%
             </p>
             <p className="text-[10.5px] text-ink-muted">
@@ -163,7 +163,7 @@ export function RegionPanel({
             {agg.languages.map((id) => (
               <li
                 key={id}
-                className="rounded border border-hairline bg-sand px-1.5 py-0.5 text-[11px] text-ink"
+                className="rounded border border-hairline bg-raised px-1.5 py-0.5 text-[11px] text-ink"
               >
                 {bi(LANGUAGE_LABELS[id], lang)}
               </li>
@@ -179,7 +179,7 @@ export function RegionPanel({
             {agg.segments.map((id) => (
               <li
                 key={id}
-                className="rounded border border-hairline bg-sand px-1.5 py-0.5 text-[11px] text-ink"
+                className="rounded border border-hairline bg-raised px-1.5 py-0.5 text-[11px] text-ink"
               >
                 {bi(SEGMENT_LABELS[id], lang)}
               </li>
@@ -190,7 +190,7 @@ export function RegionPanel({
         <button
           type="button"
           onClick={isFiltered ? onClear : onFilterToRegion}
-          className="mt-1 flex min-h-11 w-full items-center justify-between gap-2 rounded-lg bg-charcoal px-4 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-deep-green"
+          className="bg-flare-gradient mt-1 flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-4 py-3 text-[13px] font-semibold text-flare-ink transition-opacity hover:opacity-90"
         >
           {isFiltered ? t("clearRegionFilter", lang) : t("filterToRegion", lang)}
           <span aria-hidden="true">{lang === "ar" ? "←" : "→"}</span>
@@ -199,7 +199,7 @@ export function RegionPanel({
         <p className="text-[10.5px] text-ink-muted">
           {t("sourceLabel", lang)}:{" "}
           <a
-            className="font-medium text-deep-green underline"
+            className="font-medium text-flare underline"
             href={source.url}
             target="_blank"
             rel="noreferrer"

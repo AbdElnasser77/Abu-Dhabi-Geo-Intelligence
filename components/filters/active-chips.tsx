@@ -94,7 +94,7 @@ export function ActiveChips({
           key={chip.key}
           type="button"
           onClick={chip.remove}
-          className="inline-flex items-center gap-1.5 rounded-full border border-deep-green/30 bg-pale-green px-2.5 py-1 text-xs font-medium text-deep-green hover:border-uae-red hover:text-uae-red print-hide"
+          className="inline-flex items-center gap-1.5 rounded-full border border-flare-line bg-flare-tint px-2.5 py-1 text-xs font-medium text-flare hover:border-uae-red hover:text-uae-red print-hide"
         >
           {chip.label}
           <span aria-hidden="true">✕</span>

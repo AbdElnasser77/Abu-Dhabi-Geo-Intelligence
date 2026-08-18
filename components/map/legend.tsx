@@ -121,9 +121,9 @@ export function IntelligenceLayerRail({
                 className={[
                   "flex items-center gap-2 py-2 text-[13px]",
                   available
-                    ? "cursor-pointer hover:text-deep-green"
+                    ? "cursor-pointer hover:text-flare"
                     : "cursor-not-allowed text-ink-muted/60",
-                  active ? "font-semibold text-deep-green" : "text-ink",
+                  active ? "font-semibold text-flare" : "text-ink",
                 ].join(" ")}
                 title={reason ? bi(reason, lang) : undefined}
               >
@@ -144,7 +144,7 @@ export function IntelligenceLayerRail({
                     {active ? "●" : "›"}
                   </span>
                 ) : (
-                  <span className="rounded-sm bg-sand px-1 py-0.5 text-[9px] uppercase tracking-wide text-ink-muted">
+                  <span className="rounded-sm bg-raised px-1 py-0.5 text-[9px] uppercase tracking-wide text-ink-muted">
                     {t("layerUnavailable", lang)}
                   </span>
                 )}
@@ -157,7 +157,7 @@ export function IntelligenceLayerRail({
         })}
       </ul>
       {(layer === "nationality" || layer === "language") && (
-        <p className="mt-2 rounded-md bg-sand px-2 py-1.5 text-[10.5px] leading-snug text-ink-muted">
+        <p className="mt-2 rounded-md bg-raised px-2 py-1.5 text-[10.5px] leading-snug text-ink-muted">
           {bi(PRIMARY_TAG_NOTE, lang)}
         </p>
       )}

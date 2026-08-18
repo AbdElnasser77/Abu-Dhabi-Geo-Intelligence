@@ -119,6 +119,11 @@ const S = {
   // Region outlines + region intelligence panel
   intelligenceLayer: { en: "Intelligence layer", ar: "طبقة المعلومات" },
   matchingAreas: { en: "matching areas", ar: "منطقة مطابقة" },
+  // Singular. Without it the count reads "1 matching areas". Arabic keeps the
+  // same word: after a number, Arabic does not take the English plural -s, and
+  // the existing form already reads correctly for one — flagged for the Arabic
+  // reviewer along with the rest of this file.
+  matchingArea: { en: "matching area", ar: "منطقة مطابقة" },
   baseline: { en: "2024 baseline", ar: "خط أساس 2024" },
   officialBaseline: { en: "Official baseline", ar: "خط أساس رسمي" },
   liveFilteredDirectory: { en: "Live filtered directory", ar: "الدليل المُرشّح المباشر" },
@@ -291,18 +296,136 @@ const S = {
   skipToResults: { en: "Skip to results", ar: "تخطَّ إلى النتائج" },
 
   // Hero
-  heroTitle: {
-    en: "Read the emirate before you commit to a location.",
-    ar: "اقرأ الإمارة قبل أن تلتزم بموقع.",
+  // The eyebrow above the headline. Written in caps because that is how it is
+  // set; the banner also applies `uppercase`, which is a no-op on the Arabic.
+  //
+  // NOTE FOR REVIEW: "LIVE" is a marketing claim this dataset does not support.
+  // Nothing here is live — `reference/14` is a static 2024 seed and REFERENCE_YEAR
+  // is the only year in the product. Copy signed off as-is; if the provenance
+  // review pushes back, "MARKET INTELLIGENCE · 2024 BASELINE" says the same thing
+  // without the claim.
+  heroBadge: {
+    en: "LIVE MARKET INTELLIGENCE · 2024 BASELINE",
+    ar: "ذكاء سوقي حي · خط أساس 2024",
   },
+  // Split across two lines by the banner layout.
+  heroTitle: { en: "See Abu Dhabi", ar: "شاهد أبوظبي" },
+  // Kept short on purpose: the banner renders the headline in Manrope at
+  // lg:text-7xl inside a 48rem column, and a longer second line wraps to a
+  // third — which breaks the two-line composition the design is built on.
+  heroTitleLine2: { en: "beyond the map.", ar: "أبعد من الخريطة." },
+  // The one word of the headline carrying the accent colour. Matched against the
+  // headline's own words with trailing punctuation stripped, so it is written
+  // here bare — "commit", not "commit." — and must appear verbatim in
+  // `heroTitle` or `heroTitleLine2` above or nothing is highlighted.
+  heroTitleHighlight: { en: "map", ar: "الخريطة" },
+  // NOTE FOR REVIEW: this names five layers, and two of them — population and
+  // healthcare — are exactly the two that `LAYER_AVAILABLE` in lib/taxonomy.ts
+  // sets to `false`, with their reasons in LAYER_UNAVAILABLE_REASON. The hero
+  // therefore promises more than the workspace can render. Copy signed off
+  // as-is; the honest version of this sentence is "population, place, purchasing
+  // power and languages", or the two layers need their sources connected.
   heroBody: {
-    en: "An interactive map of 25 localities across all three regions — every figure carrying its status, its source and its reference year. Where a number is not published, this map says so instead of estimating one.",
-    ar: "خريطة تفاعلية لـ25 منطقة في المناطق الثلاث كلها — كل رقم يحمل حالته ومصدره وسنة إسناده. وحين لا يكون الرقم منشورًا، تقول الخريطة ذلك بدلًا من تقديره.",
+    en: "One interactive intelligence layer connecting population, place, purchasing power, languages and healthcare opportunity.",
+    ar: "طبقة ذكاء تفاعلية واحدة تربط السكان والمكان والقوة الشرائية واللغات وفرص الرعاية الصحية.",
   },
-  heroOpenWorkspace: { en: "Open the workspace", ar: "افتح مساحة العمل" },
-  heroBrowseDirectory: { en: "Browse the directory", ar: "استعرض الدليل" },
+  // Renamed from heroOpenWorkspace/heroBrowseDirectory: the keys named what the
+  // destination was, and the labels no longer do.
+  heroPrimaryCta: { en: "Explore the emirate", ar: "استكشف الإمارة" },
+  // Points at the baseline-and-sources section, which is the only thing in this
+  // product that answers to "executive brief" — scope, counts, data year and the
+  // source list. There is no separate brief document or route.
+  heroSecondaryCta: { en: "View executive brief", ar: "اطّلع على الملخص التنفيذي" },
   regionsCovered: { en: "Regions covered", ar: "المناطق المشمولة" },
   seedLocalities: { en: "Seed localities", ar: "المناطق الأساسية" },
+
+  // Baseline + sources section (the content moved out of the hero)
+  baselineAndSources: { en: "Baseline and sources", ar: "خط الأساس والمصادر" },
+  baselineNote: {
+    en: "Scope of the current dataset. The counts here describe this dataset and are derived from it; they are not published statistics.",
+    ar: "نطاق مجموعة البيانات الحالية. الأعداد هنا تصف هذه المجموعة وتُشتق منها، وهي ليست إحصاءات منشورة.",
+  },
+  districtDataGap: {
+    en: "No official district-level population or nationality count is published for Abu Dhabi. Locality profiles are qualitative planning inputs, and any measure the sources do not carry is shown as a reason rather than a zero.",
+    ar: "لا يوجد عدد رسمي منشور للسكان أو الجنسيات على مستوى المناطق في أبوظبي. ملفات المناطق مُدخلات تخطيطية نوعية، وأي مقياس لا تتضمنه المصادر يُعرض كسبب لا كصفر.",
+  },
+
+  // ---- Market signals section --------------------------------------------
+  signalsEyebrow: { en: "Market signals", ar: "مؤشرات السوق" },
+  signalsTitle: { en: "Intelligence you can act on.", ar: "معلومات قابلة للتنفيذ." },
+  signalsLead: {
+    en: "Each signal turns demographic context into a practical healthcare and communication priority — and says plainly where the data stops.",
+    ar: "كل مؤشر يترجم السياق السكاني إلى أولوية عملية للرعاية الصحية والتواصل — ويوضح بصراحة حيث تتوقف البيانات.",
+  },
+
+  sigCorridorEyebrow: { en: "Premium corridor", ar: "الممر المتميز" },
+  sigCorridorTitle: {
+    en: "Island and waterfront opportunity",
+    ar: "فرص الجزر والواجهات المائية",
+  },
+  sigCorridorBody: {
+    en: "These localities concentrate premium residences, internationally recruited professionals and high-value service potential.",
+    ar: "تتركز في هذه المناطق المساكن المتميزة والمهنيون المستقدمون دولياً وإمكانات الخدمات ذات القيمة العالية.",
+  },
+
+  sigLanguageEyebrow: { en: "Language coverage", ar: "التغطية اللغوية" },
+  sigLanguageTitle: {
+    en: "Arabic and English reach every locality",
+    ar: "العربية والإنجليزية تصل إلى كل منطقة",
+  },
+  // The load-bearing caveat. Without it these bars read as population share,
+  // which is the figure nobody publishes.
+  sigLanguageNote: {
+    en: "Localities that list each language as a priority. This is not a share of the population — no such figure is published.",
+    ar: "المناطق التي تُدرج كل لغة كأولوية. وهذه ليست نسبة من السكان — فلا يوجد رقم منشور بذلك.",
+  },
+
+  sigAgeEyebrow: { en: "Prime age group", ar: "الفئة العمرية الأساسية" },
+  sigAgeTitle: { en: "A young, working-age market", ar: "سوق شاب في سن العمل" },
+  sigAgeBody: {
+    en: "Prevention, family formation and long-term wellness carry this profile far better than late-stage care.",
+    ar: "تلائم الوقاية وتكوين الأسرة والعافية طويلة المدى هذا الملف أكثر بكثير من الرعاية في المراحل المتأخرة.",
+  },
+
+  sigSegmentEyebrow: { en: "Community mix", ar: "تركيبة المجتمع" },
+  sigSegmentTitle: { en: "Who the localities name", ar: "من تذكره المناطق" },
+
+  sigGapTitle: { en: "What this section does not claim", ar: "ما لا تزعمه هذه القائمة" },
+  sigGapBody: {
+    en: "Service-line demand cannot be ranked from this dataset. Doing so would need a facility or point-of-interest source, which is not connected yet — so no ranking is shown rather than an invented one.",
+    ar: "لا يمكن ترتيب الطلب على خطوط الخدمة من مجموعة البيانات هذه. إذ يتطلب ذلك مصدراً للمرافق أو نقاط الاهتمام وهو غير متصل بعد — لذا لا يُعرض أي ترتيب بدلاً من ترتيب مُختلق.",
+  },
+
+  ofLocalities: { en: "of 25 localities", ar: "من 25 منطقة" },
+  localitiesListing: { en: "localities", ar: "منطقة" },
+  scoreOutOfFive: { en: "of 5", ar: "من 5" },
+  uniformScore: {
+    en: "All five score the maximum.",
+    ar: "الخمس جميعها تسجّل الحد الأقصى.",
+  },
+
+  // ---- District directory (section 03) -----------------------------------
+  dirEyebrow: { en: "District directory", ar: "دليل المناطق" },
+  drillInto: { en: "Drill into", ar: "تعمّق في" },
+  dirSearchPlaceholder: { en: "Search city or district", ar: "ابحث عن مدينة أو منطقة" },
+  dirOpenOnMap: { en: "Open on the map", ar: "افتح على الخريطة" },
+  dirNoMatch: {
+    en: "No district in this region matches that search.",
+    ar: "لا توجد منطقة في هذا الإقليم تطابق هذا البحث.",
+  },
+  dirCount: { en: "districts", ar: "منطقة" },
+
+  // ---- Evidence tiers -----------------------------------------------------
+  evidenceTitle: {
+    en: "Every insight carries its evidence.",
+    ar: "كل استنتاج يحمل دليله.",
+  },
+  // Verbatim, one sentence. A second sentence was added here earlier and has been
+  // removed: the copy for this section was given exactly.
+  evidenceBody: {
+    en: "Official statistics, supported estimates and qualitative profiles are never blended without disclosure.",
+    ar: "لا تُخلط الإحصاءات الرسمية والتقديرات المدعومة والملفات النوعية دون إفصاح.",
+  },
 } as const;
 
 export type StringKey = keyof typeof S;

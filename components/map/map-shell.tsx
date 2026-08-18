@@ -23,7 +23,7 @@ const MapCanvas = dynamic(() => import("@/components/map/map-canvas"), {
   ssr: false,
   loading: () => (
     <div
-      className="absolute inset-0 grid place-items-center bg-sand"
+      className="absolute inset-0 grid place-items-center bg-raised"
       role="status"
       aria-busy="true"
     >
@@ -109,8 +109,13 @@ export function MapShell({
   }, []);
 
   return (
-    <div className="flex min-w-0 flex-col">
-      <div className="relative h-[calc(100vh-8.5rem)] min-h-[460px] overflow-hidden bg-sand">
+    <div className="flex min-w-0 flex-col lg:min-h-0 lg:flex-1">
+      {/*
+        On `lg` and up the map takes whatever the workspace column has left, so it
+        cannot push the block past one screen. Below that it keeps an explicit
+        height, because in a stacked layout there is no leftover to fill.
+      */}
+      <div className="relative h-[62svh] min-h-[340px] overflow-hidden bg-raised lg:h-auto lg:min-h-0 lg:flex-1">
         {!failure && (
           <MapCanvas
             key={attempt}
@@ -130,7 +135,7 @@ export function MapShell({
         )}
 
         {failure && (
-          <div className="absolute inset-0 grid place-items-center overflow-y-auto bg-sand p-6">
+          <div className="absolute inset-0 grid place-items-center overflow-y-auto bg-raised p-6">
             <div className="max-w-lg text-center">
               <h3 className="text-base font-semibold text-ink">{t("mapErrorTitle", lang)}</h3>
               <p className="mt-2 text-sm leading-relaxed text-ink">
@@ -142,7 +147,7 @@ export function MapShell({
                 </p>
               )}
               {failure.detail && (
-                <p className="mt-3 break-words rounded-md bg-white px-3 py-2 text-start font-mono text-[11px] text-ink-muted">
+                <p className="mt-3 break-words rounded-md bg-surface px-3 py-2 text-start font-mono text-[11px] text-ink-muted">
                   <span className="font-sans font-semibold">{t("mapErrorDetail", lang)}: </span>
                   {failure.detail}
                 </p>
@@ -151,13 +156,13 @@ export function MapShell({
                 <button
                   type="button"
                   onClick={retry}
-                  className="min-h-11 rounded-lg bg-deep-green px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-brand"
+                  className="min-h-11 rounded-lg bg-flare px-4 py-2 text-sm font-semibold text-flare-ink transition-colors hover:bg-flare-amber"
                 >
                   {t("mapRetry", lang)}
                 </button>
                 <a
                   href="#results"
-                  className="min-h-11 rounded-lg border border-hairline bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-emerald-brand"
+                  className="min-h-11 rounded-lg border border-hairline bg-surface px-4 py-2 text-sm font-semibold text-ink hover:border-flare/60"
                 >
                   {t("skipToResults", lang)}
                 </a>
@@ -176,10 +181,10 @@ export function MapShell({
         {/* Active-layer chip, bottom inline-start — mirrors under RTL. */}
         {!failure && (
           <div className="pointer-events-none absolute bottom-3 start-3 z-10 flex flex-col items-start gap-2">
-            <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-hairline bg-white/95 px-3 py-1.5 text-[11px] font-medium text-ink shadow-sm backdrop-blur">
+            <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-hairline bg-surface/90 px-3 py-1.5 text-[11px] font-medium text-ink shadow-sm backdrop-blur">
               <span
                 aria-hidden="true"
-                className="size-2 rounded-full bg-emerald-brand"
+                className="size-2 rounded-full bg-flare"
               />
               {bi(THEMATIC_LAYER_LABELS[layer], lang)} {t("activeLayer", lang)} ·{" "}
               <span className="tabular-nums">{formatNumber(matchCount, lang)}</span>{" "}
@@ -187,7 +192,7 @@ export function MapShell({
             </span>
             {clusters.clusterCount > 0 && (
               <span
-                className="pointer-events-auto inline-flex rounded-full border border-hairline bg-white/95 px-3 py-1.5 text-[11px] text-ink-muted shadow-sm backdrop-blur"
+                className="pointer-events-auto inline-flex rounded-full border border-hairline bg-surface/90 px-3 py-1.5 text-[11px] text-ink-muted shadow-sm backdrop-blur"
                 role="status"
               >
                 <span className="font-semibold text-ink">{clusters.groupedAreas}</span>
@@ -200,7 +205,7 @@ export function MapShell({
         {/* Permanent statement of what the dashed outlines are and are not. */}
         {!failure && (
           <p
-            className="pointer-events-auto absolute bottom-9 end-3 z-10 max-w-[19rem] rounded-md bg-charcoal/90 px-2.5 py-1.5 text-[10.5px] leading-snug text-white shadow-sm"
+            className="pointer-events-auto absolute bottom-9 end-3 z-10 max-w-[19rem] rounded-md border border-hairline bg-surface/90 px-2.5 py-1.5 text-[10.5px] leading-snug text-ink-muted shadow-lg backdrop-blur"
             title={t("boundaryExplain", lang)}
           >
             {t("boundaryNote", lang)}
@@ -217,7 +222,7 @@ export function MapShell({
         </p>
       )}
 
-      <p className="border-t border-hairline bg-white px-4 py-2 text-[10.5px] leading-snug text-ink-muted">
+      <p className="border-t border-hairline bg-surface px-4 py-2 text-[10.5px] leading-snug text-ink-muted">
         {t("pointProfileNote", lang)} {t("boundaryExplain", lang)}
         {process.env.NODE_ENV !== "production" && USING_PUBLIC_OSM_TILES && (
           <span className="ms-1 font-medium text-uae-red">

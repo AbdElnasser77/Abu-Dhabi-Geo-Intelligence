@@ -1,38 +1,176 @@
 @import "tailwindcss";
 
 /*
- * Brand palette from reference/09 "Design system". Tailwind v4 is configured
- * CSS-first — there is no tailwind.config file in this project, so tokens
- * declared here are what generate the `bg-*`, `text-*` and `border-*` utilities.
+ * Dark theme. Tailwind v4 is configured CSS-first — there is no tailwind.config
+ * file in this project, so tokens declared here are what generate the `bg-*`,
+ * `text-*` and `border-*` utilities.
+ *
+ * Two palettes live side by side and must not be confused:
+ *
+ *  1. **Chrome** — the neutral ramp plus one accent, below. A Vercel-style dark
+ *     UI is a near-black ground, hairline borders and exactly one bright colour
+ *     doing all the emphasis. In Vercel's own case that colour is white; here it
+ *     is the hero's flare, because the page opens on `public/hero/cosmos-limb.jpg`
+ *     and the accent that follows should be the light the reader has just seen.
+ *  2. **Data** — `lib/colors.ts`. Purchasing-power, category, segment, language
+ *     and confidence scales encode governed values and are fixed by
+ *     `reference/14`. They are NOT re-keyed to the accent: an orange marker means
+ *     purchasing-power band 2, not "selected".
+ *
+ * Chrome may be restyled freely. Data colours may not.
  */
 @theme {
-  --color-uae-red: #c8102e;
-  --color-emerald-brand: #0b7a53;
-  --color-deep-green: #064e3b;
-  --color-charcoal: #121826;
-  --color-sand: #f5f1e8;
-  --color-pale-green: #ecf6f1;
+  /* ---- Accent: the hero flare -------------------------------------------
+   * Sampled from the same photograph the opening sequence traces, so the accent
+   * and the hero are literally the same light. `flare` and `flare-gold` are the
+   * rim gradient's orange and gold in lib/hero-rim.ts (#ff7633 at 25%, #ffe499
+   * at 100%). The rim's dark maroon end is deliberately NOT a token: it is the
+   * part of the photograph that is barely lit, and as a UI fill it is too dark
+   * to carry `flare-ink` (4.2:1, under AA) and too desaturated to read as the
+   * accent.
+   *
+   * Anything that would be white on Vercel is `flare` here. Anything sitting ON
+   * flare is `flare-ink` — near-black, because both ends of this gradient are
+   * far too light to carry white text (#ff7633 against white is 2.4:1, well
+   * under the 4.5:1 AA floor; against flare-ink it is 8.9:1).
+   */
+  --color-flare: #ff7633;
+  --color-flare-gold: #ffe499;
+  --color-flare-amber: #ffa24d;
+  --color-flare-ink: #180b03;
+
+  /* Tints, for fills that must stay behind body text. Opaque rather than
+     `flare/10`, so stacked translucent layers cannot compound into a wash. */
+  --color-flare-tint: #221206;
+  --color-flare-line: #4d2810;
+
+  /* ---- Neutral ramp -----------------------------------------------------
+   * Pure black ground with near-black panels above it. The steps are small on
+   * purpose: on an OLED-black page a 6% lift already reads as "raised", and
+   * bigger jumps turn every card into a grey box.
+   */
+  --color-base: #000000;
+  --color-surface: #0a0a0a;
+  --color-raised: #141414;
+  --color-hairline: #262626;
+  --color-hairline-strong: #383838;
+
+  --color-ink: #ededed;
+  --color-ink-muted: #a1a1a1;
+  --color-ink-faint: #858585;
+
+  /* ---- Brand palette (reference/09) -------------------------------------
+   * Only the two that still carry meaning survive; the greens are gone, because
+   * everything that used them meant "primary" or "selected" and now says so with
+   * the accent instead. These two do not mean emphasis:
+   *
+   *  - `uae-red` is destructive — the clear-filter and remove-chip hovers. It is
+   *    lifted from the print #c8102e, which is 2.4:1 on near-black; this value
+   *    is 5.5:1 and stays recognisably the same red.
+   *  - `gold` carries the data caveats (the tile-licence banner, the
+   *    "not published at district level" notes), which must not look like an
+   *    action. Unchanged from reference/09 and only ever used at low alpha.
+   */
+  --color-uae-red: #f04a5e;
   --color-gold: #c99a2e;
 
-  --color-ink: #121826;
-  --color-ink-muted: #5b6472;
-  --color-hairline: #e2ddd0;
-  --color-surface: #ffffff;
+  /*
+   * The sticky top bar's height, as a spacing token so it generates `h-topbar`,
+   * `top-topbar` and `scroll-mt-topbar` together.
+   *
+   * It exists because four separate places need to agree on it: the bar itself,
+   * the filter rail and the detail panel that stick BELOW it, and the
+   * `scroll-mt` on every anchor the hero and the skip links jump to. Before this
+   * they disagreed — two consumers said 4.25rem and one said 3.5rem, against a
+   * bar that measured 57px — so anchored content landed under the bar and the
+   * rail floated 12px below it.
+   *
+   * The bar enforces this height at `lg` rather than merely tending toward it,
+   * which is what makes the token true rather than an estimate. Below `lg` it is
+   * a floor: the bar is `flex-wrap` and genuinely gains a row on narrow screens,
+   * so the anchors carry a larger `scroll-mt` there instead.
+   */
+  --spacing-topbar: 3.5rem;
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --font-arabic: var(--font-plex-arabic);
+  /* Headings and the hero line. Generates the `font-display` utility; without
+     the token the class is silently inert and headings render in Inter. */
+  --font-display: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
+}
+
+/*
+ * The one gradient in the system: the hero rim, flattened to a fill. Used for
+ * the primary action and the emirate total — the two things the eye should
+ * reach first — and nowhere else, because a gradient that appears on everything
+ * stops meaning "primary".
+ */
+@utility bg-flare-gradient {
+  /* Orange to gold, the same run the hero rim makes. It starts AT `flare`
+     rather than before it so that no point on the fill is darker than #ff7633 —
+     `flare-ink` on that is 7.3:1, and every lighter point along the gradient is
+     better, so a label on this fill passes AA wherever it happens to sit. */
+  background-image: linear-gradient(
+    100deg,
+    var(--color-flare) 0%,
+    var(--color-flare-amber) 46%,
+    var(--color-flare-gold) 100%
+  );
+}
+
+/* The same gradient as text, for figures that should read as the accent. */
+@utility text-flare-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-flare) 0%,
+    var(--color-flare-amber) 45%,
+    var(--color-flare-gold) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /*
  * The create-next-app scaffold set `font-family: Arial` on body, which silently
  * overrode the font variables above it. Removed. Arabic gets its own face
- * because Geist has no Arabic coverage.
+ * because neither Inter nor Manrope has Arabic coverage.
  */
 body {
-  background: var(--color-sand);
+  background: var(--color-base);
   color: var(--color-ink);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/*
+ * Headings take the display face globally rather than one utility class per
+ * heading. Tailwind preflight already strips heading sizes, so this sets family
+ * and tracking only and leaves every size decision to the utilities on the
+ * element — nothing here changes an existing layout.
+ *
+ * Layered into `base` so a `font-*` utility on any individual heading still
+ * wins; unlayered, this bare element selector would beat the utility class.
+ */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.014em;
+  }
+
+  /* Manrope's default figures are proportional, which makes a column of
+     population counts stagger. The table and KPI cards ask for `tabular-nums`
+     explicitly; this covers headings, which cannot. */
+  h1,
+  h2 {
+    letter-spacing: -0.025em;
+  }
 }
 
 /*
@@ -44,6 +182,18 @@ body {
  */
 [dir="rtl"] {
   font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+}
+
+/*
+ * Manrope has no Arabic glyphs, so an Arabic heading in it would fall back to
+ * whatever the OS picks — inconsistent, and usually poor for Arabic. Hand it to
+ * the reviewed Arabic face instead. Unlayered on purpose: it has to beat both
+ * the base layer above and the `font-display` utility.
+ */
+[dir="rtl"] :is(h1, h2, h3, h4, h5, h6),
+[dir="rtl"] .font-display {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+  letter-spacing: 0;
 }
 
 /* Respect the OS setting rather than animating regardless (reference/09). */
@@ -58,11 +208,601 @@ body {
   }
 }
 
-/* A consistently visible focus ring — a WCAG 2.2 AA requirement. */
+/*
+ * A consistently visible focus ring — a WCAG 2.2 AA requirement.
+ *
+ * The accent, not the brand red: on a near-black ground the red ring is 3.9:1
+ * against the surface and misses WCAG 2.2's 3:1 non-text floor once it lands on
+ * a raised panel, while the flare is 7.7:1 against every neutral in the ramp.
+ * The offset is what keeps it legible on top of a flare-filled button too — the
+ * ring sits in the surface gap rather than on the fill it matches.
+ */
 :where(a, button, input, select, summary, [tabindex]):focus-visible {
-  outline: 3px solid var(--color-uae-red);
+  outline: 2px solid var(--color-flare);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/*
+ * Native scrollbars. `color-scheme: dark` in the viewport export already darkens
+ * them in Chromium and Firefox; this only narrows and tones the rails inside the
+ * app's own scrolling panels (the filter rail, the drawer), which are small
+ * enough that the default 15px bar is a visible grey stripe against black.
+ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline-strong) transparent;
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero entrance.
+ *
+ * The banner in `components/ui/responsive-hero-banner.tsx` uses
+ * `animate-fade-slide-in-1..4` to stagger its rows. The upstream snippet shipped
+ * the keyframes but not those classes, so they are defined here rather than
+ * pulling in `tw-animate-css` for four rules.
+ *
+ * Deliberately NOT taken from the upstream snippet: its `@theme` block. The
+ * palette is declared at the top of this file and is not upstream's zinc
+ * greyscale, and the display face is Manrope rather than upstream's Instrument
+ * Serif — a serif with no Arabic coverage, in an app that renders Arabic. See
+ * the RTL font rule above.
+ * --------------------------------------------------------------------------- */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-in-1,
+.animate-fade-slide-in-2,
+.animate-fade-slide-in-3,
+.animate-fade-slide-in-4 {
+  animation: fadeSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-slide-in-1 {
+  animation-delay: 0.05s;
+}
+.animate-fade-slide-in-2 {
+  animation-delay: 0.16s;
+}
+.animate-fade-slide-in-3 {
+  animation-delay: 0.27s;
+}
+.animate-fade-slide-in-4 {
+  animation-delay: 0.38s;
+}
+
+/* ---------------------------------------------------------------------------
+ * Headline, word by word.
+ *
+ * `components/ui/responsive-hero-banner.tsx` wraps every word of the <h1> in a
+ * `.hero-word` and sets `--w` to its ordinal, counting continuously across both
+ * lines. The delay is computed here rather than there so the intro sequence can
+ * retime the entire headline by changing two variables — see the `[data-intro]`
+ * override further down.
+ *
+ * `inline-block` is required: `transform` does nothing on a non-replaced inline
+ * box, so without it the words would fade but not rise. It also means the space
+ * between words has to be a real text node, which is why the component emits one
+ * rather than padding the spans.
+ *
+ * The rise is em-relative (0.42em) rather than the block animation's flat 20px,
+ * because the headline steps from text-4xl to text-7xl across four breakpoints —
+ * a fixed 20px is a third of the cap height on mobile and a tenth of it on a
+ * desktop, so the same rule would read as a lurch at one size and a twitch at
+ * the other.
+ */
+@keyframes heroWordIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.42em);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.hero-word {
+  --hero-word-base: 0.12s;
+  --hero-word-step: 0.09s;
+  --hero-word-dur: 0.8s;
+  display: inline-block;
+  /*
+   * `will-change` is deliberately absent. These are one-shot animations on a
+   * handful of elements; promoting each to its own compositor layer permanently
+   * costs more than the animation does, and the browser promotes them for the
+   * duration on its own.
+   */
+  animation: heroWordIn var(--hero-word-dur) cubic-bezier(0.16, 1, 0.3, 1)
+    calc(var(--hero-word-base) + var(--w, 0) * var(--hero-word-step)) both;
+}
+
+/*
+ * The global reduced-motion block above collapses duration but not delay, which
+ * would leave the hero blank for a third of a second before snapping in. Drop
+ * the animation entirely instead.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-slide-in-1,
+  .animate-fade-slide-in-2,
+  .animate-fade-slide-in-3,
+  .animate-fade-slide-in-4,
+  .hero-word {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero opening sequence.
+ *
+ * Black frame -> a dot of light ignites at the start of the traced curve -> the
+ * line draws behind it -> the photograph fades up underneath -> the copy last.
+ * All of it CSS, keyed off `[data-intro]` on the hero section, so there is no
+ * JS, no state to hydrate, and no frame where the finished hero flashes first.
+ *
+ * The whole thing lands at ~2.55s, with the headline's first word at 1.00s.
+ *
+ * That is a real trade-off, not a preference, and it is worth stating plainly:
+ * Chrome does not count `opacity: 0` elements as LCP candidates, so every delay
+ * here pushes Largest Contentful Paint out by the same amount. The largest
+ * element on this page is the cover photograph, which is why the photograph is
+ * NOT on the slowest track — it completes at 1.25s, well inside the 2.5s "good"
+ * threshold, and the copy is what runs on past it. The h1 is the next-largest
+ * candidate and now finishes at ~2.55s, so on a slow connection this page can
+ * still tip out of "good".
+ *
+ * Lengthening these numbers further worsens Core Web Vitals directly. Measure
+ * before doing it.
+ * --------------------------------------------------------------------------- */
+[data-intro] {
+  /* The frame the sequence opens on. Pure #000, matching the photograph's own
+     near-black — anything lighter shows the handover as the whole frame
+     darkening when the image arrives. Unlayered, so it beats the section's own
+     background utility. */
+  background-color: #000;
+
+  /*
+   * Gentle in, gentle out — roughly 52% of the curve drawn at the halfway
+   * point. The first attempt used a high first control point (0.22, 0.61) which
+   * front-loaded it badly: 94% of the line was drawn in 73% of the time, so the
+   * dot appeared to rocket away and then stall just short of the end.
+   */
+  --i-ease: cubic-bezier(0.45, 0.05, 0.25, 1);
+  --i-draw-delay: 0.1s;
+  --i-draw-dur: 1.05s;
+  /* The photograph arrives while the line is still drawing and is complete at
+     1.25s — before the first word at 1.00s has finished, so the headline lands
+     on the image rather than on the black frame. That ordering is the point. */
+  --i-bg-delay: 0.7s;
+  --i-bg-dur: 0.55s;
+  --i-line-out-delay: 1.2s;
+  --i-line-out-dur: 0.45s;
+  /* The badge sits above the headline, so it goes first, just under 1s. */
+  --i-content-delay: 0.86s;
+  /* Where the headline's last word finishes: base + 5 steps + duration, for the
+     six-word English headline. The description and the buttons key off this so
+     they follow the headline instead of interleaving with it. A longer headline
+     would overrun it — this is a layout constant, not a computed one. */
+  --i-words-end: 2.5s;
+}
+
+/* The photograph and its scrim start absent; the frame is just black. */
+[data-intro] .hero-intro-bg {
+  opacity: 0;
+  animation: heroBgIn var(--i-bg-dur) ease-out var(--i-bg-delay) forwards;
+}
+
+@keyframes heroBgIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * Above the image, below the copy. The line is an opening device only, so once
+ * the photograph has arrived it fades out and leaves the real rim behind — the
+ * two are aligned to ~0.6px at 1080p, which is what makes that handover
+ * invisible. See lib/hero-rim.ts.
+ */
+.hero-intro-line {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  animation: heroLineOut var(--i-line-out-dur) ease-in var(--i-line-out-delay) forwards;
+}
+
+@keyframes heroLineOut {
+  to {
+    opacity: 0;
+  }
+}
+
+.hero-intro-trail,
+.hero-intro-head {
+  fill: none;
+}
+
+/*
+ * The trail. Stroke colour is a gradient sampled from the photograph, so the
+ * drawn line is literally the colour of the thing it becomes. The glow is
+ * stacked drop-shadows rather than a blurred duplicate stroke: one element, and
+ * drop-shadow costs far less to repaint each frame than a large `blur()` over a
+ * full-bleed layer while `stroke-dashoffset` animates.
+ */
+.hero-intro-trail {
+  stroke: url(#hero-rim-gradient);
+  stroke-width: 5;
+  filter: url(#hero-rim-glow);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: heroDraw var(--i-draw-dur) var(--i-ease) var(--i-draw-delay) forwards;
+}
+
+@keyframes heroDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/*
+ * The dot. One dash 0.3% of the path long with a round cap — a circle that
+ * rides the curve. The pattern totals exactly 1, so it never repeats: it just
+ * travels once. This is why no motion-path, no `animateMotion` and no JS are
+ * needed, and why the dot cannot drift off the line at any viewport size.
+ */
+.hero-intro-head {
+  stroke: #fff8ec;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: 0.003 0.997;
+  stroke-dashoffset: 0.003;
+  filter: url(#hero-rim-glow);
+  animation:
+    heroRide var(--i-draw-dur) var(--i-ease) var(--i-draw-delay) forwards,
+    heroHeadIn 0.16s ease-out both,
+    heroHeadOut 0.22s ease-in calc(var(--i-draw-delay) + var(--i-draw-dur) - 0.1s) forwards;
+}
+
+@keyframes heroRide {
+  to {
+    stroke-dashoffset: -0.997;
+  }
+}
+@keyframes heroHeadIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes heroHeadOut {
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * The copy comes last, re-timed behind the line rather than on its own stagger.
+ * Tighter steps and a shorter duration than the standalone version, so the whole
+ * sequence still finishes at ~1.55s.
+ */
+/*
+ * The headline's stagger, retimed for the sequence. The design calls for "Read"
+ * at 1.00s, "the" at 1.15s and "emirate" at 1.30s — a flat 0.15s step, which the
+ * remaining words simply continue on rather than each carrying a hand-written
+ * delay. A regular step is also the only thing that generalises: the Arabic
+ * headline has a different word count.
+ */
+[data-intro] .hero-word {
+  --hero-word-base: 1s;
+  --hero-word-step: 0.15s;
+  --hero-word-dur: 0.75s;
+}
+
+/*
+ * Badge first, then the headline's words, then the description and the buttons
+ * once the last word has landed. `-2` no longer drives anything — the h1 used to
+ * carry it — but keeps a sane delay in case the banner is reused with another
+ * element in that slot.
+ */
+[data-intro] .animate-fade-slide-in-1,
+[data-intro] .animate-fade-slide-in-2,
+[data-intro] .animate-fade-slide-in-3,
+[data-intro] .animate-fade-slide-in-4 {
+  animation-duration: 0.7s;
+}
+[data-intro] .animate-fade-slide-in-1 {
+  animation-delay: var(--i-content-delay);
+}
+[data-intro] .animate-fade-slide-in-2 {
+  animation-delay: calc(var(--i-content-delay) + 0.1s);
+}
+[data-intro] .animate-fade-slide-in-3 {
+  animation-delay: calc(var(--i-words-end) - 0.34s);
+}
+[data-intro] .animate-fade-slide-in-4 {
+  animation-delay: calc(var(--i-words-end) - 0.16s);
+}
+
+/*
+ * Reduced motion: land on the finished frame immediately. The global rule near
+ * the top of this file collapses animation DURATION but leaves DELAY intact, so
+ * without these overrides a reduced-motion reader would sit in front of a black
+ * rectangle for a second and then have everything snap in — worse than the
+ * animation. The delays have to be cancelled, not just shortened.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-intro] .hero-intro-bg {
+    opacity: 1;
+    animation: none !important;
+  }
+  .hero-intro-line {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero seam.
+ *
+ * Two sections meeting at a visible edge is what makes a full-bleed hero look
+ * cheap, and it happens here because the photograph has a hard bottom and the
+ * next section has its own ground. Three things fix it, stacked:
+ *
+ *  1. The section below carries a transparent-to-black gradient on its top edge,
+ *     so the photograph dissolves into the copy rather than stopping.
+ *  2. The hero is pinned (`sticky`) from `md` up and the section is pulled up
+ *     over it, so the content rises out of the darkness instead of the hero
+ *     sliding away. Below `md` the hero simply scrolls: an element taller than
+ *     the viewport cannot usefully stick to its top, and on a short phone the
+ *     hero is taller than the viewport.
+ *  3. The hero dims as it is released, tied to scroll position rather than time.
+ *
+ * The gradient's ground is `--color-base`, the same black the section uses, which
+ * is what makes the transition invisible rather than merely soft.
+ * --------------------------------------------------------------------------- */
+.hero-seam-below {
+  /*
+   * The ramp is the section's OWN background, not an overlay on top of one.
+   *
+   * The first attempt kept `bg-base` on the element and laid this gradient over
+   * it in a `::before`. That cannot work: the element painted opaque black from
+   * its very first pixel, so the gradient was compositing over black and the
+   * hard edge survived underneath it. Measured, it was a 19-unit luminance step
+   * sitting exactly on the section's top edge and tracking the scroll 1:1.
+   *
+   * With no `background-color` set, the top of the element is genuinely
+   * transparent and the pinned hero shows through it. A gradient extends its
+   * final stop colour indefinitely, so everything past 34svh is solid `base`
+   * without needing a second layer.
+   */
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    /* Reaching most of the way to opaque within 10svh suppresses the hero's own
+       COPY ghosting through, which reads as a smudge rather than as depth. The
+       photograph still bleeds, because at this point in the frame it is the arc
+       and the arc is what should carry through. */
+    rgb(0 0 0 / 0.72) 10svh,
+    var(--color-base) 26svh
+  );
+}
+
+/*
+ * The frosted edge, and it belongs to THIS section rather than to the hero.
+ *
+ * `backdrop-filter` blurs whatever is painted beneath the element, which here is
+ * the pinned hero showing through the transparent top of the ramp above. The mask
+ * fades the blur out downward, so there is no line where the blur stops — an
+ * unmasked blur band has a hard bottom edge and simply moves the seam rather than
+ * removing it.
+ *
+ * Nothing is applied to the hero to achieve this. The hero is not dimmed and its
+ * bottom is not darkened; it is left as the photograph, and the section dissolves
+ * itself over it.
+ */
+.hero-seam-below::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 26svh;
+  pointer-events: none;
+  /*
+   * 12px, not 20px. Measured while scrolling the handover on a software
+   * rasteriser: no blur ~33ms/frame, blur(12px) ~50ms, blur(20px) ~66ms — those
+   * are vsync buckets, so roughly two, three and four frames. 8px cost the same
+   * as 12px and band height barely mattered, so 12px is the knee: below it
+   * nothing is saved, above it a whole frame is spent. Over a near-black backdrop
+   * 12px is already well past the point where more radius reads as more blur.
+   */
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  /*
+   * Faded at BOTH ends. Opaque at the top meant the blur reached full strength on
+   * its first pixel, so where the band met the un-blurred hero there was a hard
+   * sharpness line — a blurred patch with a visible edge rather than a dissolve.
+   */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 30%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 30%, #000 55%, transparent 100%);
+}
+
+/* Grain. On an OLED-black ground the long gradients above band into visible
+   steps; a little fractal noise breaks them up. Kept very faint — at higher
+   opacity it reads as a dirty screen rather than as film. */
+@utility bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+}
+
+/*
+ * Scroll-linked, not time-linked. `scroll()` and `view()` timelines run on the
+ * compositor and need no JS and no scroll listener. Where they are unsupported
+ * the `@supports` guard simply leaves everything in its resting state, which is
+ * the fully-visible one — so nothing is hidden behind a capability check.
+ */
+@supports (animation-timeline: scroll()) {
+  @media not (prefers-reduced-motion: reduce) {
+    /*
+     * The hero copy drifts slower than the scroll, so letting go of the hero
+     * reads as deliberate. Targeted by markup rather than a prop because the
+     * banner in components/ui/responsive-hero-banner.tsx is a shared component
+     * being edited in parallel; if that wrapper's classes change, the parallax
+     * quietly stops and nothing else breaks.
+     */
+    [data-intro] > div.relative.z-10.flex {
+      animation: heroDrift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100svh;
+    }
+  }
+}
+
+/*
+ * Scroll reveals for the landing sections.
+ *
+ * `view()` gives each element its OWN timeline against the scrollport, so the
+ * progress is its own entry, not the page's. No JS, no IntersectionObserver, and
+ * it runs on the compositor.
+ *
+ * `animation-delay` is deliberately absent: on a progress-based timeline it does
+ * nothing. Staggering is done with `animation-range` instead — later children
+ * start their entry a little further along, which reads as a cascade and, unlike
+ * a time delay, stays locked to the scroll position if the reader stops moving.
+ *
+ * Deliberately NOT applied to the map or its column. `revealRise` animates
+ * `transform`, and a transformed ancestor becomes the containing block for
+ * `position: fixed` descendants and interferes with MapLibre's own transforms on
+ * the canvas and markers. The tool is left alone; only the editorial sections
+ * move.
+ */
+@supports (animation-timeline: view()) {
+  @media not (prefers-reduced-motion: reduce) {
+    .reveal-on-scroll,
+    .reveal-stagger > * {
+      animation: revealRise linear both;
+      animation-timeline: view();
+      animation-range: entry 6% entry 46%;
+    }
+
+    /*
+     * Fade with no rise, for the LAST element on the page.
+     *
+     * `translateY` on the final block extends the scrollable overflow region by
+     * the translate distance while that block is still un-revealed, so the
+     * document grew and shrank by exactly 20px as the footer entered and left —
+     * a measurable scroll-height wobble at the very bottom of the page. Fading
+     * without moving costs nothing there and removes it.
+     */
+    .reveal-fade {
+      animation: revealFade linear both;
+      animation-timeline: view();
+      animation-range: entry 6% entry 46%;
+    }
+
+    /* The cascade. Capped at the fifth child: past that the elements are far
+       enough down the page that their own entry does the staggering. */
+    .reveal-stagger > *:nth-child(2) {
+      animation-range: entry 11% entry 51%;
+    }
+    .reveal-stagger > *:nth-child(3) {
+      animation-range: entry 16% entry 56%;
+    }
+    .reveal-stagger > *:nth-child(4) {
+      animation-range: entry 21% entry 61%;
+    }
+    .reveal-stagger > *:nth-child(n + 5) {
+      animation-range: entry 24% entry 64%;
+    }
+  }
+}
+
+
+
+@keyframes heroDrift {
+  to {
+    transform: translateY(9svh);
+  }
+}
+
+/*
+ * Fallback path, for browsers with no scroll-driven animations.
+ *
+ * Gated on `[data-reveal-fallback]`, which `components/reveal-fallback.tsx` sets
+ * on <html> only after confirming the CSS path is unavailable. That ordering is
+ * the whole safety property: the stylesheet never hides anything on its own, so
+ * a browser with JS disabled, or a script that fails to run, still shows every
+ * section. Hiding first and revealing from script is how pages end up blank.
+ */
+[data-reveal-fallback] .reveal-on-scroll,
+[data-reveal-fallback] .reveal-fade,
+[data-reveal-fallback] .reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Matches the CSS path: the page's last block fades without moving. */
+[data-reveal-fallback] .reveal-fade {
+  transform: none;
+}
+
+[data-reveal-fallback] .reveal-stagger > *:nth-child(2) {
+  transition-delay: 70ms;
+}
+[data-reveal-fallback] .reveal-stagger > *:nth-child(3) {
+  transition-delay: 140ms;
+}
+[data-reveal-fallback] .reveal-stagger > *:nth-child(4) {
+  transition-delay: 210ms;
+}
+[data-reveal-fallback] .reveal-stagger > *:nth-child(n + 5) {
+  transition-delay: 240ms;
+}
+
+[data-reveal-fallback] [data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes revealFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes revealRise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -91,8 +831,8 @@ body {
   transform: rotate(-45deg);
   border: 2px solid #ffffff;
   box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.3),
-    0 4px 10px rgb(0 0 0 / 0.18);
+    0 1px 2px rgb(0 0 0 / 0.5),
+    0 4px 10px rgb(0 0 0 / 0.35);
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -114,11 +854,14 @@ body {
 }
 
 .ad-marker[data-selected="true"] {
-  /* reference/03: 3px white inner stroke plus a UAE-red outer accent. */
+  /* reference/03 asks for a 3px inner stroke plus an outer accent ring. The
+     inner stroke stays white — it separates the fill from the basemap and the
+     fill is a data colour — and the outer ring is the app accent, so "selected"
+     reads the same here as it does in the directory and the filter rail. */
   box-shadow:
     0 0 0 3px #ffffff,
-    0 0 0 6px var(--color-uae-red),
-    0 4px 12px rgb(0 0 0 / 0.3);
+    0 0 0 6px var(--color-flare),
+    0 4px 12px rgb(0 0 0 / 0.45);
   transform: rotate(-45deg) scale(1.12);
   z-index: 3;
 }
@@ -148,16 +891,19 @@ body {
   height: 34px;
   padding: 0 7px;
   border-radius: 9999px;
-  border: 2px solid #ffffff;
-  background: var(--color-deep-green);
-  color: #ffffff;
+  /* Accent ring on a near-black bubble, rather than an accent FILL: a filled
+     cluster would read as one strongly-emphasised place instead of several
+     folded together, and the halo below is what carries "group". */
+  border: 2px solid var(--color-flare);
+  background: #0d0d0d;
+  color: var(--color-flare-gold);
   font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   box-shadow:
-    0 0 0 4px rgb(6 78 59 / 0.2),
-    0 2px 8px rgb(0 0 0 / 0.25);
+    0 0 0 4px rgb(255 118 51 / 0.16),
+    0 2px 10px rgb(0 0 0 / 0.55);
   transition: transform 140ms ease;
 }
 
@@ -170,15 +916,81 @@ body {
  * after the vendor stylesheet — those rules would lose every tie from here. */
 
 /* ---------------------------------------------------------------------------
+ * Basemap.
+ *
+ * The tile source is OSM raster (`lib/map-style.ts`) — a light cartography with
+ * no dark variant, so a raw tile is a bright white rectangle in the middle of a
+ * black page. Nothing about that is fixable in the style spec: a raster layer
+ * has no per-feature paint properties to restyle, only whole-image ones.
+ *
+ * `invert` + `hue-rotate(180deg)` is the standard fix and is not a hack: the
+ * inversion darkens the paper and lightens the ink, and the 180° rotation puts
+ * every hue back where it started, so parks stay green and water stays blue
+ * rather than becoming magenta and orange. The brightness/contrast trim after it
+ * stops the result glowing grey — a plain inversion of white paper lands at
+ * about #1a1a1a-equivalent luminance, brighter than every panel around it.
+ *
+ * Applied to the canvas ONLY, never the container: the container also holds the
+ * HTML markers and the popup, and inverting those would flip every data colour
+ * in the legend to its complement — the one thing this file must not do.
+ *
+ * If `NEXT_PUBLIC_TILE_URL` is ever pointed at a provider with a real dark
+ * style, delete this rule rather than stacking one filter on another.
+ */
+.ad-map-container .maplibregl-canvas {
+  filter: invert(1) hue-rotate(180deg) brightness(0.94) contrast(0.92)
+    saturate(0.72);
+}
+
+/* The frame the tiles land in, so the gaps while they load are not white. */
+.ad-map-container {
+  background-color: #0d0d0d;
+}
+
+/* ---------------------------------------------------------------------------
  * Print — reference/15 §6 asks for query criteria, map, legend and results.
+ *
+ * The app is dark; paper is not. Rather than restate every rule in reverse, the
+ * theme tokens are repointed to a light ramp for print — Tailwind v4 emits them
+ * as custom properties on `:root` and every utility reads them through `var()`,
+ * so redefining eight variables re-themes the whole document. Ink on white also
+ * matters beyond taste here: printing #ededed body text on white paper yields a
+ * page that is legibly blank.
  * --------------------------------------------------------------------------- */
 @media print {
+  :root {
+    --color-base: #ffffff;
+    --color-surface: #ffffff;
+    --color-raised: #f5f1e8;
+    --color-hairline: #d8d3c6;
+    --color-hairline-strong: #b9b3a4;
+    --color-ink: #121826;
+    --color-ink-muted: #4b5563;
+    --color-ink-faint: #6b7280;
+    /* The accent has to darken too: #ff7633 on white is 2.4:1, and most printers
+       render it lighter still. */
+    --color-flare: #a3410d;
+    --color-flare-gold: #7a5a12;
+    --color-flare-tint: #fdf2e7;
+    --color-flare-line: #e2c3a6;
+    --color-uae-red: #c8102e;
+  }
+
   .print-hide {
     display: none !important;
   }
 
   body {
     background: #ffffff;
+  }
+
+  /* The dark-mode inversion above would print the map as a photo negative. */
+  .ad-map-container .maplibregl-canvas {
+    filter: none;
+  }
+
+  .ad-map-container {
+    background-color: #ffffff;
   }
 
   .print-break-before {

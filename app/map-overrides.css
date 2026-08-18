@@ -52,18 +52,76 @@
   direction: ltr;
 }
 
+/* ---------------------------------------------------------------------------
+ * MapLibre's own chrome, darkened.
+ *
+ * Vendor ships white control groups and a white attribution pill. Both are
+ * hard-coded here rather than left to the canvas filter in `globals.css`,
+ * because that filter is deliberately scoped to `.maplibregl-canvas` — the
+ * controls are DOM siblings of the canvas, not part of it, so they are untouched
+ * by it and would otherwise sit as two bright white blocks on a black map.
+ * --------------------------------------------------------------------------- */
 .maplibregl-ctrl-group {
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  background: rgb(10 10 10 / 0.92);
+  border: 1px solid var(--color-hairline);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top-color: var(--color-hairline);
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.maplibregl-ctrl-group button:disabled:hover {
+  background-color: transparent;
+}
+
+/*
+ * The zoom and compass glyphs are background SVGs with `fill` baked into a
+ * data-URI, so they cannot be recoloured by a `color` declaration — inverting
+ * the icon is the only way to turn vendor's near-black glyph light. Applied to
+ * the icon span alone so it does not invert the button's own background.
+ */
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1);
+  opacity: 0.85;
+}
+
+.maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon {
+  opacity: 1;
 }
 
 .maplibregl-ctrl-attrib {
   font-size: 11px;
+  background: rgb(10 10 10 / 0.82) !important;
+  color: var(--color-ink-muted);
 }
 
 .maplibregl-ctrl-attrib a {
-  color: var(--color-charcoal);
+  color: var(--color-ink);
   text-decoration: underline;
+  text-decoration-color: var(--color-hairline-strong);
+}
+
+.maplibregl-ctrl-attrib a:hover {
+  text-decoration-color: var(--color-flare);
+}
+
+/* The attribution toggle is the same baked-fill SVG case as the zoom glyphs. */
+.maplibregl-ctrl-attrib-button {
+  filter: invert(1);
+}
+
+/* Vendor's scale bar is a dark border on a translucent white block. */
+.maplibregl-ctrl-scale {
+  background: rgb(10 10 10 / 0.7);
+  border-color: var(--color-hairline-strong);
+  color: var(--color-ink-muted);
 }
 
 /* ---------------------------------------------------------------------------
@@ -87,9 +145,11 @@
 
 .maplibregl-popup.ad-popup .maplibregl-popup-content {
   padding: 0;
+  background: var(--color-surface);
+  color: var(--color-ink);
   border: 1px solid var(--color-hairline);
   border-radius: 10px;
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.18);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.6);
   overflow: hidden;
   /*
    * Vendor sets `pointer-events: auto` here, which defeats the `none` on the
@@ -98,6 +158,18 @@
    * mouseleave, and hover flickers on and off.
    */
   pointer-events: none;
+}
+
+/*
+ * The tip is a CSS triangle drawn with border colours, so it is not covered by
+ * the background rule above and would stay white — a small bright wedge pointing
+ * out of an otherwise dark card. Each anchor colours a different border edge.
+ */
+.maplibregl-popup.ad-popup .maplibregl-popup-tip {
+  border-top-color: var(--color-surface);
+  border-bottom-color: var(--color-surface);
+  border-left-color: var(--color-surface);
+  border-right-color: var(--color-surface);
 }
 
 .ad-popup-body {
@@ -123,8 +195,10 @@
   height: 28px;
   flex: 0 0 auto;
   border-radius: 9999px;
+  /* White, matching the map marker this popup describes — the ring separates a
+     data-coloured fill from what is behind it, in both places. */
   border: 2px solid #ffffff;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.45);
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -175,6 +249,6 @@
 
 /* Match the focus treatment used everywhere else in the app (WCAG 2.2 AA). */
 .maplibregl-ctrl button:focus-visible {
-  outline: 3px solid var(--color-uae-red);
+  outline: 2px solid var(--color-flare);
   outline-offset: 2px;
 }

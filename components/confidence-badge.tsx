@@ -23,8 +23,8 @@ export function ConfidenceBadge({
     <span
       className={
         size === "sm"
-          ? "inline-flex items-center gap-1.5 rounded-full border border-hairline bg-white px-2 py-0.5 text-[11px] font-medium text-ink-muted"
-          : "inline-flex items-center gap-1.5 rounded-full border border-hairline bg-white px-2.5 py-1 text-xs font-medium text-ink-muted"
+          ? "inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface px-2 py-0.5 text-[11px] font-medium text-ink-muted"
+          : "inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface px-2.5 py-1 text-xs font-medium text-ink-muted"
       }
       title={meaning}
     >
