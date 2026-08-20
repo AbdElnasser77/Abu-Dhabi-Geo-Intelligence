@@ -350,6 +350,17 @@ const S = {
     ar: "لا يوجد عدد رسمي منشور للسكان أو الجنسيات على مستوى المناطق في أبوظبي. ملفات المناطق مُدخلات تخطيطية نوعية، وأي مقياس لا تتضمنه المصادر يُعرض كسبب لا كصفر.",
   },
 
+  // ---- Section nav in the top bar ----------------------------------------
+  // Labels echo the sections' own headings, so a reader who lands somewhere knows
+  // they arrived where the button said. "Signals" is what section 02 calls itself
+  // ("02 / Market signals"); "Districts" is used rather than "Directory" because
+  // the results table inside the workspace is already the "Live filtered
+  // directory" and two things called directory is a collision, not a synonym.
+  navSections: { en: "Sections", ar: "الأقسام" },
+  navExplore: { en: "Explore", ar: "استكشاف" },
+  navSignals: { en: "Signals", ar: "المؤشرات" },
+  navDistricts: { en: "Districts", ar: "المناطق" },
+
   // ---- Market signals section --------------------------------------------
   signalsEyebrow: { en: "Market signals", ar: "مؤشرات السوق" },
   signalsTitle: { en: "Intelligence you can act on.", ar: "معلومات قابلة للتنفيذ." },

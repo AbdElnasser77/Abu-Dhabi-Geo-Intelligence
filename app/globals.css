@@ -180,6 +180,15 @@ body {
  * cannot). Form controls inherit automatically — Tailwind preflight already
  * applies `font: inherit` to them.
  */
+/*
+ * Anchor jumps glide rather than teleport, now that the top bar navigates between
+ * sections. The reduced-motion block below already forces `scroll-behavior: auto`,
+ * so it was written expecting this.
+ */
+html {
+  scroll-behavior: smooth;
+}
+
 [dir="rtl"] {
   font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
 }

@@ -24,7 +24,7 @@ export function EvidenceTiers({ lang }: { lang: Lang }) {
     <section
       id="evidence"
       aria-labelledby="evidence-heading"
-      className="scroll-mt-[var(--spacing-topbar)] border-t border-hairline bg-base"
+      className="scroll-mt-[6.25rem] border-t border-hairline bg-base lg:scroll-mt-topbar"
     >
       <div className="mx-auto grid w-full max-w-[1600px] gap-10 px-5 pt-16 pb-20 sm:px-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16 lg:px-14">
         <div className="reveal-on-scroll">

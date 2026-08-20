@@ -124,7 +124,7 @@ export function TopBar({
       ].join(" ")}
     >
       <div className="mx-auto flex w-full max-w-[1600px] min-h-topbar flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 lg:h-topbar lg:flex-nowrap lg:py-0 lg:px-6">
-        <div className="me-auto min-w-0">
+        <div className="min-w-0">
           {/* Not an <h1>: the hero above now owns the page heading, and two h1s
               on one document is a real problem for screen-reader navigation.
               Visually identical — this is the sticky wordmark, not a title. */}
@@ -138,6 +138,35 @@ export function TopBar({
           </p>
         </div>
 
+
+        {/*
+          Section nav. Plain anchors, so they are shareable, middle-clickable and
+          work before hydration — and each target carries its own `scroll-mt`, so
+          the heading lands below this fixed bar rather than under it.
+
+          Hidden below `sm`: on a phone this row wraps, and three more items turned
+          it into a three-line bar taller than the content it was labelling.
+        */}
+        <nav aria-label={t("navSections", lang)} className="me-auto hidden sm:flex">
+          <ul className="flex items-center gap-1">
+            {(
+              [
+                ["#map-pane", "navExplore"],
+                ["#signals", "navSignals"],
+                ["#districts", "navDistricts"],
+              ] as const
+            ).map(([href, key]) => (
+              <li key={href}>
+                <a
+                  href={href}
+                  className="rounded-md px-2.5 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  {t(key, lang)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <button
           type="button"
           onClick={onToggleFilters}

@@ -56,7 +56,7 @@ export function DistrictDirectory({ lang }: { lang: Lang }) {
     <section
       id="districts"
       aria-labelledby="districts-heading"
-      className="scroll-mt-[var(--spacing-topbar)] border-t border-hairline bg-base"
+      className="scroll-mt-[6.25rem] border-t border-hairline bg-base lg:scroll-mt-topbar"
     >
       <div className="mx-auto w-full max-w-[1600px] px-5 pt-16 pb-20 sm:px-8 lg:px-14">
         <div className="reveal-on-scroll flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
