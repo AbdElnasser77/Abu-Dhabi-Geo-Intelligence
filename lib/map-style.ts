@@ -18,6 +18,8 @@
 
 import type { StyleSpecification } from "maplibre-gl";
 
+import { withBasePath } from "@/lib/base-path";
+
 /**
  * Where we serve MapLibre's Web Worker from.
  *
@@ -45,12 +47,16 @@ import type { StyleSpecification } from "maplibre-gl";
  * in that folder. `scripts/sync-maplibre-worker.mjs` copies them out of
  * `node_modules` and runs on `postinstall`, which keeps them from drifting away
  * from the installed version.
+ *
+ * It goes through `withBasePath()` because a raw URL is not rewritten for
+ * `basePath` — on GitHub Pages the site lives under `/<repo>/`.
  */
-export const WORKER_URL = "/maplibre/maplibre-gl-worker.mjs";
+export const WORKER_URL = withBasePath("/maplibre/maplibre-gl-worker.mjs");
 
 export const DEFAULT_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-export const TILE_URL = process.env.NEXT_PUBLIC_TILE_URL ?? DEFAULT_TILE_URL;
+// `||`, not `??`: CI passes an unset repository variable as an empty string.
+export const TILE_URL = process.env.NEXT_PUBLIC_TILE_URL || DEFAULT_TILE_URL;
 
 /** True when running on the shared OSM tile server rather than a licensed one. */
 export const USING_PUBLIC_OSM_TILES = TILE_URL === DEFAULT_TILE_URL;

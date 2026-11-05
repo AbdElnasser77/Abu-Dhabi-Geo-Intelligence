@@ -1,4 +1,5 @@
 import ResponsiveHeroBanner from "@/components/ui/responsive-hero-banner";
+import { withBasePath } from "@/lib/base-path";
 import { HERO_RIM } from "@/lib/hero-rim";
 import { t } from "@/lib/i18n";
 import type { Lang } from "@/lib/taxonomy";
@@ -43,7 +44,7 @@ export function Hero({ lang }: { lang: Lang }) {
       className="min-h-screen md:sticky md:top-0 md:z-0 print-hide"
       // Self-hosted rather than hot-linked from the component author's storage
       // bucket, so the hero cannot break when that bucket moves.
-      backgroundImageUrl="/hero/cosmos-limb.jpg"
+      backgroundImageUrl={withBasePath("/hero/cosmos-limb.jpg")}
       // No `badgeLabel`. It used to carry an "Official" status pill, which was
       // true of the old eyebrow ("SCAD emirate and region totals") and is not
       // true of this one — stamping `official` next to a market-intelligence

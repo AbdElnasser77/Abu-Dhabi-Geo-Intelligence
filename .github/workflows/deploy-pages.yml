@@ -1,0 +1,60 @@
+# Builds the static export and publishes it to GitHub Pages.
+#
+# One-time setup: repo Settings → Pages → Build and deployment → Source:
+# "GitHub Actions".
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; never cancel one that is already publishing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `postinstall` also re-syncs the MapLibre worker into public/maplibre/.
+      - run: npm ci
+
+      - name: Build static export
+        run: npm run build
+        env:
+          # A project site is served from /<repo>/ — see next.config.ts.
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          # Set a repository variable to use a licensed tile provider; when
+          # unset, lib/map-style.ts falls back to the public OSM tile server.
+          NEXT_PUBLIC_TILE_URL: ${{ vars.NEXT_PUBLIC_TILE_URL }}
+
+      # Pages must not run Jekyll over the output: it drops `_next/`.
+      - run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

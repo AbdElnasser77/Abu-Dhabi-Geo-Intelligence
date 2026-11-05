@@ -44,6 +44,21 @@ Tile Usage Policy permits only for light/development use. **Set
 `NEXT_PUBLIC_TILE_URL` to a licensed provider (MapTiler, Stadia, Protomaps) or a
 self-hosted endpoint before deploying.** Attribution must stay visible either way.
 
+## Hosting: static export on GitHub Pages
+
+`next.config.ts` sets `output: "export"`; `.github/workflows/deploy-pages.yml`
+builds on push to `main` and publishes `out/` (repo Settings → Pages → Source:
+GitHub Actions). Consequences:
+
+- Nothing may read the request at runtime — no `searchParams` prop, `cookies()`,
+  `headers()`, Server Actions or Route Handlers. `?lang=` is read on the client by
+  `PageBodyFromUrl` (`components/page-body.tsx`); the build prerenders English.
+- The site lives under `/<repo>/` (`NEXT_PUBLIC_BASE_PATH`, set by the workflow).
+  `next/link` adds it; raw URLs to `public/` files (`<img src>`, the MapLibre
+  worker) must use `withBasePath()` from `lib/base-path.ts`.
+- On Windows Git Bash, set `MSYS_NO_PATHCONV=1` when passing
+  `NEXT_PUBLIC_BASE_PATH=/...` to a local build, or MSYS rewrites it to a path.
+
 ## Gotchas
 
 - CSS import order in `app/layout.tsx` is load-bearing: `globals.css` →

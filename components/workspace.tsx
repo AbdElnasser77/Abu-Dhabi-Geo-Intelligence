@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ActiveChips } from "@/components/filters/active-chips";
@@ -39,29 +39,26 @@ import type { Lang, RegionId, ThematicLayer } from "@/lib/taxonomy";
  * back/forward works with no synchronisation code, and a shared link always
  * reproduces exactly what the sender saw — both required by `reference/15 §3`.
  *
- * Two different update mechanisms, on purpose:
- *  - filters and selection use `window.history.pushState`, the documented Next 16
- *    shallow-update path, which refreshes `useSearchParams` without a server
- *    round-trip;
- *  - the language toggle uses `router.push`, because `dir` and `metadata` are
- *    rendered on the server. The component tree is unchanged by that navigation,
- *    so the MapLibre instance survives it and map state is preserved — an
- *    explicit acceptance criterion in `reference/02`.
+ * Every update — filters, selection and the language toggle — uses
+ * `window.history.pushState`, the documented Next 16 shallow-update path, which
+ * refreshes `useSearchParams` without a navigation. The site is a static export,
+ * so `lang` is read from the URL on the client by `PageBodyFromUrl` and arrives
+ * here as a prop. The component tree is unchanged by a language switch, so the
+ * MapLibre instance survives it and map state is preserved — an explicit
+ * acceptance criterion in `reference/02`.
  */
-export function Workspace({ initialQuery }: { initialQuery: Query }) {
-  const router = useRouter();
-  const pathname = usePathname();
+export function Workspace({ lang: pageLang }: { lang: Lang }) {
   const searchParams = useSearchParams();
 
   const urlQuery = useMemo(
     () => parseQuery(getterFromSearchParams(searchParams)),
     [searchParams],
   );
-  // `lang` comes from the server's parse of the same URL — the value the page
-  // already used for `dir` — so the two can never disagree mid-render.
+  // `lang` comes from the page's parse of the same URL — the value it already
+  // used for `dir` — so the two can never disagree mid-render.
   const query = useMemo<Query>(
-    () => ({ ...urlQuery, lang: initialQuery.lang }),
-    [urlQuery, initialQuery.lang],
+    () => ({ ...urlQuery, lang: pageLang }),
+    [urlQuery, pageLang],
   );
 
   const results = useMemo(() => filterAreas(query), [query]);
@@ -180,13 +177,8 @@ export function Workspace({ initialQuery }: { initialQuery: Query }) {
 
   const onToggleLang = useCallback(() => {
     const next: Lang = lang === "en" ? "ar" : "en";
-    const current = parseQuery(
-      getterFromSearchParams(new URLSearchParams(window.location.search)),
-    );
-    router.push(`${pathname}${toHref({ ...current, lang: next })}`, {
-      scroll: false,
-    });
-  }, [lang, pathname, router]);
+    commit((current) => ({ ...current, lang: next }));
+  }, [lang, commit]);
 
   const onExport = useCallback(() => downloadCsv(results, lang), [results, lang]);
 
